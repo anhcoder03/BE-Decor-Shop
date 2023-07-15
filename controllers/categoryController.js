@@ -1,4 +1,5 @@
 const Category = require("../models/categoryModel");
+const Product = require("../models/productModel");
 const slugify = require("slugify");
 const getAllCategory = async (req, res) => {
   try {
@@ -66,6 +67,7 @@ const addCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndRemove(req.params.id);
+    await Product.deleteMany({ categoryId: req.params.id });
     if (!category) {
       return res.status(400).json({
         message: "Danh mục không tồn tại !",
