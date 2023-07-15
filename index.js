@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const { default: mongoose } = require("mongoose");
 const { categoryRouter } = require("./routes/categoryRoutes");
 const { productRouter } = require("./routes/productRoutes");
+const {UserRouter} = require("./routes/authRoutes");
 const app = express();
 app.use(express.urlencoded());
 app.use(express.json());
@@ -11,6 +12,7 @@ app.use(cookieParser());
 app.use(cors());
 categoryRouter(app);
 productRouter(app);
+UserRouter(app);
 require("dotenv").config();
 mongoose
   .connect(
