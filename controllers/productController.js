@@ -31,7 +31,7 @@ const getOneProduct = async (req, res) => {
     }
     return res.json({
       message: "Lấy sản phẩm thành công !",
-      category,
+      product,
     });
   } catch (error) {
     return res.status(404).json({
