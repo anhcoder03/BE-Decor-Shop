@@ -48,6 +48,13 @@ const addCategory = async (req, res) => {
     });
   }
   try {
+    const isName = await Category.findOne({ name: formData.name });
+    if (isName) {
+      return res.status(400).json({
+        success: false,
+        message: "Danh mục đã tồn tại!",
+      });
+    }
     const category = await Category.create(req.body);
     if (!category) {
       return res.status(400).json({
