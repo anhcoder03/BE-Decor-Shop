@@ -40,14 +40,21 @@ const getOneProduct = async (req, res) => {
   }
 };
 const addProduct = async (req, res) => {
-  const formData = req.body;
-  if (!formData.name) {
+  const { name, image, price, desc } = req.body;
+  if (!name || !image || !price || !desc) {
     return res.status(400).json({
       success: false,
-      message: "Phải nhập tên sản phẩm!",
+      message: "Vui lòng điền đầy đủ thông tin",
     });
   }
   try {
+    const isName = await Product.findOne({ name });
+    if (isName) {
+      return res.status(400).json({
+        success: false,
+        message: "Sản phẩm đã tồn tại!",
+      });
+    }
     const product = await Product.create(req.body);
     await Category.findByIdAndUpdate(product.categoryId, {
       $addToSet: { products: product._id },
@@ -91,15 +98,15 @@ const deleteProduct = async (req, res) => {
 };
 const updateProduct = async (req, res) => {
   const id = req.params.id;
-  const formData = req.body;
-  if (!formData.name) {
+  const { name, image, price, desc } = req.body;
+  if (!name || !image || !price || !desc) {
     return res.status(400).json({
       success: false,
-      message: "Phải nhập tên sản phẩm!",
+      message: "Vui lòng điền đẩy đủ các trường !",
     });
   }
   try {
-    const isName = await Product.findOne({ name: formData.name });
+    const isName = await Product.findOne({ name });
     if (isName) {
       return res.status(400).json({
         success: false,
@@ -113,8 +120,8 @@ const updateProduct = async (req, res) => {
         message: "Không tìm thấy sản phẩm",
       });
     } else {
-      data.name = formData.name;
-      data.slug = slugify(formData.name, { lower: true });
+      data.name = name;
+      data.slug = slugify(name, { lower: true });
       await data.save();
       return res.status(200).json({
         success: true,
