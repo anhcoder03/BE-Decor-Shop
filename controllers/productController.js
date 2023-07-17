@@ -98,34 +98,36 @@ const deleteProduct = async (req, res) => {
 };
 const updateProduct = async (req, res) => {
   const id = req.params.id;
-  const { name, image, price, desc } = req.body;
+  const { name, image, price, desc, categoryId } = req.body;
   if (!name || !image || !price || !desc) {
     return res.status(400).json({
       success: false,
-      message: "Vui lòng điền đẩy đủ các trường !",
+      message: "Vui lòng điền đầy đủ các trường!",
     });
   }
   try {
-    const isName = await Product.findOne({ name });
-    if (isName) {
-      return res.status(400).json({
-        success: false,
-        message: "Sản phẩm đã tồn tại!",
-      });
-    }
-    const data = await Product.findById(id);
+    const data = await Product.findOneAndUpdate(
+      { _id: id },
+      {
+        name: name,
+        slug: slugify(name, { lower: true }),
+        image: image,
+        price: price,
+        desc: desc,
+        categoryId: categoryId,
+      },
+      { new: true }
+    );
     if (!data) {
       return res.status(404).json({
         success: false,
         message: "Không tìm thấy sản phẩm",
       });
     } else {
-      data.name = name;
-      data.slug = slugify(name, { lower: true });
-      await data.save();
       return res.status(200).json({
         success: true,
         message: "Cập nhật sản phẩm thành công!",
+        data,
       });
     }
   } catch (error) {

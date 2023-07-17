@@ -100,13 +100,6 @@ const updateCategory = async (req, res) => {
     });
   }
   try {
-    const isName = await Category.findOne({ name: formData.name });
-    if (isName) {
-      return res.status(400).json({
-        success: false,
-        message: "Danh mục đã tồn tại!",
-      });
-    }
     const data = await Category.findById(id);
     if (!data) {
       return res.status(404).json({
@@ -120,6 +113,7 @@ const updateCategory = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Cập nhật danh mục thành công!",
+        data,
       });
     }
   } catch (error) {
