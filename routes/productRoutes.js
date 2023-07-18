@@ -5,6 +5,7 @@ const {
   addProduct,
   deleteProduct,
   updateProduct,
+  getProductWithSlug,
 } = require("../controllers/productController");
 const route = express.Router();
 const productRouter = (app) => {
@@ -13,6 +14,7 @@ const productRouter = (app) => {
   route.post("/products", addProduct);
   route.delete("/products/:id", deleteProduct);
   route.put("/products/:id", updateProduct);
+  route.get("/product/:slug", getProductWithSlug);
   return app.use("/api/v1", route);
 };
 module.exports = { productRouter };
