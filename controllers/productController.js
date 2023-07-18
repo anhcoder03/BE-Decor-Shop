@@ -2,16 +2,20 @@ const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 const slugify = require("slugify");
 const getAllProduct = async (req, res) => {
+  let { page = 1, categoryId = null } = req.query;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 2;
   try {
-    const product = await Product.find();
-    if (!product) {
-      return res.status(400).json({
-        message: "Sản phẩm không tồn tại !",
-      });
-    }
-    return res.json({
-      message: "Lấy sản phẩm thành công !",
+    const product = await Product.find(categoryId && { categoryId })
+      .skip((+page - 1) * limit)
+      .limit(limit);
+    const totalProduct = await Product.count(categoryId && { categoryId });
+    const totalPage = Math.ceil(totalProduct / +limit);
+    return res.status(200).jsonp({
+      success: true,
+      message: "Good job",
       product,
+      totalPage,
+      totalProduct,
     });
   } catch (error) {
     return res.status(404).json({
