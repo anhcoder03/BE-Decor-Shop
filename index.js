@@ -4,7 +4,7 @@ const cookieParser = require("cookie-parser");
 const { default: mongoose } = require("mongoose");
 const { categoryRouter } = require("./routes/categoryRoutes");
 const { productRouter } = require("./routes/productRoutes");
-const {UserRouter} = require("./routes/authRoutes");
+const { UserRouter } = require("./routes/authRoutes");
 const app = express();
 app.use(express.urlencoded());
 app.use(express.json());
