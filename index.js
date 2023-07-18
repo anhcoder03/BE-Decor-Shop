@@ -5,6 +5,7 @@ const { default: mongoose } = require("mongoose");
 const { categoryRouter } = require("./routes/categoryRoutes");
 const { productRouter } = require("./routes/productRoutes");
 const { UserRouter } = require("./routes/authRoutes");
+const searchRouter = require("./routes/searchRoutes");
 const app = express();
 app.use(express.urlencoded());
 app.use(express.json());
@@ -13,6 +14,7 @@ app.use(cors());
 categoryRouter(app);
 productRouter(app);
 UserRouter(app);
+searchRouter(app);
 require("dotenv").config();
 mongoose
   .connect(
