@@ -43,6 +43,28 @@ const getOneProduct = async (req, res) => {
     });
   }
 };
+
+const getProductWithSlug = async (req, res) => {
+  try {
+    const product = await Product.findOne({ slug: req.params.slug }).populate(
+      "categoryId"
+    );
+    if (!product) {
+      return res.status(400).json({
+        message: "Sản phẩm không tồn tại !",
+      });
+    }
+    return res.json({
+      message: "Lấy sản phẩm thành công !",
+      product,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: error.message,
+    });
+  }
+};
+
 const addProduct = async (req, res) => {
   const { name, image, price, desc } = req.body;
   if (!name || !image || !price || !desc) {
@@ -148,4 +170,5 @@ module.exports = {
   updateProduct,
   addProduct,
   deleteProduct,
+  getProductWithSlug,
 };
