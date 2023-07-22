@@ -14,7 +14,7 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage: storage });
 const uploadRouter = (app) => {
-  route.post("/images/upload", upload.array("images", 10), uploadImage);
+  route.post("/images/upload", upload.array("image", 10), uploadImage);
   route.delete("/images/:publicId", deleteImage);
   return app.use("/api/v1", route);
 };
