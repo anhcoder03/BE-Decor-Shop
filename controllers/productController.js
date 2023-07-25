@@ -3,7 +3,7 @@ const Category = require("../models/categoryModel");
 const slugify = require("slugify");
 const getAllProduct = async (req, res) => {
   let { page = 1, categoryId = null } = req.query;
-  const limit = req.query.limit ? parseInt(req.query.limit) : 2;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 9;
   try {
     const product = await Product.find(categoryId && { categoryId })
       .skip((+page - 1) * limit)
