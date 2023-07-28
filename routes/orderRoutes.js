@@ -5,7 +5,7 @@ const order = require("../controllers/orderController");
 const route = express.Router();
 
 const orderRouter = (app) => {
-  route.post("/order", authenticate, order);
+  route.post("/order", order);
   return app.use("/api/v1", route);
 };
 module.exports = { orderRouter };

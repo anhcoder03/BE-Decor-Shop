@@ -1,46 +1,35 @@
-// const express = require("express");
-// const {
-//   createPayment,
-//   payMentReturn,
-// } = require("../controllers/paymentController");
-
-// const route = express.Router();
-
-// const paymentRouter = (app) => {
-//   route.post("/create_payment_url", createPayment);
-//   route.get("/payment_return", payMentReturn);
-//   return app.use("/api/v1", route);
-// };
-// module.exports = { paymentRouter };
-
-/**
- * Created by CTT VNPAY
- */
-
 let express = require("express");
 let router = express.Router();
 const request = require("request");
 const moment = require("moment");
+const Cart = require("../models/cartModel");
+const User = require("../models/authModels");
+const Order = require("../models/orderModel");
+const qs = require("qs");
 
-router.get("/", function (req, res, next) {
-  res.render("orderlist", { title: "Danh sách đơn hàng" });
-});
-
-router.get("/create_payment_url", function (req, res, next) {
-  res.render("order", { title: "Tạo mới đơn hàng", amount: 10000 });
-});
-
-router.get("/querydr", function (req, res, next) {
-  let desc = "truy van ket qua thanh toan";
-  res.render("querydr", { title: "Truy vấn kết quả thanh toán" });
-});
-
-router.get("/refund", function (req, res, next) {
-  let desc = "Hoan tien GD thanh toan";
-  res.render("refund", { title: "Hoàn tiền giao dịch thanh toán" });
-});
-
-router.post("/create_payment_url", function (req, res, next) {
+router.post("/create_payment_url", async function (req, res, next) {
+  const {
+    shippingAddress,
+    phoneNumber,
+    userId,
+    amount,
+    paymentMethods = "OnlinePayment",
+  } = req.body;
+  const carts = await Cart.find({ userId });
+  if (!carts) {
+    return res.status(400).json({
+      message: "Thông tin cart không tồn tại",
+    });
+  }
+  const data = {
+    userId,
+    carts,
+    totalAmount: amount,
+    shippingAddress,
+    phoneNumber,
+    paymentMethods,
+  };
+  const dataa = await Order.create(data);
   process.env.TZ = "Asia/Ho_Chi_Minh";
 
   let date = new Date();
@@ -59,9 +48,8 @@ router.post("/create_payment_url", function (req, res, next) {
   let tmnCode = "M3249576";
   let secretKey = "SNEESGGOFDLUVJDBWKIUXZXWBHPEZDOJ";
   let vnpUrl = config.get("vnp_Url");
-  let returnUrl = config.get("vnp_ReturnUrl");
-  let orderId = moment(date).format("DDHHmmss");
-  let amount = req.body.amount || 10001;
+  let returnUrl = config.get("vnp_ReturnUrl") + `?userId=${req.body.userId}`;
+  const orderId = dataa._id.toHexString();
   let bankCode = req.body.bankCode || "VNPAY";
 
   let locale = req.body.language || "vn";
@@ -93,14 +81,17 @@ router.post("/create_payment_url", function (req, res, next) {
   let signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
   vnp_Params["vnp_SecureHash"] = signed;
   vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
-  console.log(vnp_Params);
-  console.log(signed);
   console.log(querystring.stringify(vnp_Params, { encode: false }));
+
   res.json(vnpUrl);
 });
 
-router.get("/vnpay_return", function (req, res, next) {
-  let vnp_Params = req.query;
+router.get("/vnpay_return", async function (req, res, next) {
+  let { userId, ...vnp_Params } = req.query;
+  console.log(userId);
+  console.log(vnp_Params);
+
+  const orderId = vnp_Params["vnp_TxnRef"];
 
   let secureHash = vnp_Params["vnp_SecureHash"];
 
@@ -121,13 +112,20 @@ router.get("/vnpay_return", function (req, res, next) {
   let signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
   if (secureHash === signed) {
     if (rspCode == "00") {
+      await Cart.deleteMany({ userId });
+      await User.findByIdAndUpdate(userId, { $set: { cart: [] } });
+
+      // Redirect back to your success page
       res.redirect(
-        `http://localhost:5173?${signData}&vnp_SecureHash=${secureHash}`
+        // `http://localhost:5173?${signData}&vnp_SecureHash=${secureHash}`
+        `http://localhost:5173`
       );
     } else {
+      await Order.findOneAndDelete({ _id: orderId });
       res.redirect(`http://localhost:5173/checkout`);
     }
   } else {
+    // Checksum failed, handle the error
     res.status(200).json({ RspCode: "97", Message: "Checksum failed" });
   }
 });
