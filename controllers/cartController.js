@@ -77,6 +77,13 @@ const updateCart = async (req, res) => {
   // const id = req.params.id;
   const { userId, id, quantity } = req.body;
   try {
+    if (quantity === 0) {
+      const carts = await Cart.findOneAndDelete({ userId, _id: id });
+      res.status(200).json({
+        message: "Xoá thành công",
+        carts,
+      });
+    }
     const carts = await Cart.findOne({ userId, _id: id });
     if (!carts) {
       return res.status(404).json({
@@ -87,7 +94,7 @@ const updateCart = async (req, res) => {
     carts.quantity = quantity;
     carts.totalPrice = Number(product.price) * Number(quantity);
     carts.save();
-    return res.status(400).json({
+    return res.status(200).json({
       message: "Update thành công",
       carts,
     });
