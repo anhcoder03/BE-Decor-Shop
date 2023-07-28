@@ -5,21 +5,17 @@ const User = require("../models/authModels");
 const addToCart = async (req, res) => {
   try {
     const { userId, productId, quantity } = req.body;
-    // Kiểm tra giá trị quantity có hợp lệ không
     if (isNaN(quantity)) {
       return res.status(400).json({
         message: "Số lượng không hợp lệ",
       });
     }
-    // Lấy thông tin sản phẩm từ CSDL
     const product = await Product.findById(productId);
-    // Kiểm tra giá trị product.price có hợp lệ không
     if (isNaN(product.price)) {
       return res.status(400).json({
         message: "Giá sản phẩm không hợp lệ",
       });
     }
-    // Kiểm tra xem giỏ hàng đã tồn tại hay chưa
     const existingCart = await Cart.findOne({ userId, productId });
     if (existingCart) {
       existingCart.quantity += quantity;
@@ -34,7 +30,6 @@ const addToCart = async (req, res) => {
       });
       await newCart.save();
     }
-    // Cập nhật tổng số tiền của người dùng
     const carts = await Cart.find({ userId });
     let totalAmount = 0;
     carts.forEach((cart) => {

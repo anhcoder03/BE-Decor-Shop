@@ -8,8 +8,11 @@ const { UserRouter } = require("./routes/authRoutes");
 const searchRouter = require("./routes/searchRoutes");
 const uploadImage = require("./routes/uploadRoutes");
 const { cartRouter } = require("./routes/cartRoutes");
-// const { paymentRouter } = require("./routes/paymentRouter");
+
 const order = require("./routes/paymentRouter");
+
+const { orderRouter } = require("./routes/orderRoutes");
+
 const app = express();
 app.use(express.urlencoded());
 app.use(express.json());
@@ -24,7 +27,9 @@ UserRouter(app);
 searchRouter(app);
 uploadImage(app);
 cartRouter(app);
+orderRouter(app);
 app.use("/api/v1", order);
+
 require("dotenv").config();
 mongoose
   .connect(
