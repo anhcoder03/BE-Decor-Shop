@@ -118,11 +118,11 @@ router.get("/vnpay_return", async function (req, res, next) {
       // Redirect back to your success page
       res.redirect(
         // `http://localhost:5173?${signData}&vnp_SecureHash=${secureHash}`
-        `http://localhost:5173`
+        `https://fe-decor-shop.vercel.app/thank`
       );
     } else {
       await Order.findOneAndDelete({ _id: orderId });
-      res.redirect(`http://localhost:5173/checkout`);
+      res.redirect(`https://fe-decor-shop.vercel.app/checkout`);
     }
   } else {
     // Checksum failed, handle the error
