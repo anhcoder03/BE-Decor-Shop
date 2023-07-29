@@ -105,8 +105,14 @@ const signin = async (req, res) => {
   }
 };
 const getAllUser = async (req, res) => {
+  let { page = 1 } = req.query;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10;
   try {
-    const user = await User.find();
+    const user = await User.find()
+      .skip((+page - 1) * limit)
+      .limit(limit);
+    const totalUser = await User.count();
+    const totalPage = Math.ceil(totalUser / +limit);
     if (!user) {
       return res.status(400).json({
         message: "Lấy danh sách user thất bại",
@@ -115,6 +121,8 @@ const getAllUser = async (req, res) => {
     return res.json({
       message: "Lấy danh sách user thành công",
       user,
+      totalUser,
+      totalPage,
     });
   } catch (error) {
     return res.status(404).json({

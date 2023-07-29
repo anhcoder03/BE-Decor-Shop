@@ -114,18 +114,12 @@ router.get("/vnpay_return", async function (req, res, next) {
     if (rspCode == "00") {
       await Cart.deleteMany({ userId });
       await User.findByIdAndUpdate(userId, { $set: { cart: [] } });
-
-      // Redirect back to your success page
-      res.redirect(
-        // `http://localhost:5173?${signData}&vnp_SecureHash=${secureHash}`
-        `https://fe-decor-shop.vercel.app/thank`
-      );
+      res.redirect(`https://fe-decor-shop.vercel.app/thank`);
     } else {
       await Order.findOneAndDelete({ _id: orderId });
       res.redirect(`https://fe-decor-shop.vercel.app/checkout`);
     }
   } else {
-    // Checksum failed, handle the error
     res.status(200).json({ RspCode: "97", Message: "Checksum failed" });
   }
 });
