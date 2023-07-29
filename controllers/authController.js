@@ -104,8 +104,46 @@ const signin = async (req, res) => {
     });
   }
 };
+const getAllUser = async (req, res) => {
+  try {
+    const user = await User.find();
+    if (!user) {
+      return res.status(400).json({
+        message: "Lấy danh sách user thất bại",
+      });
+    }
+    return res.json({
+      message: "Lấy danh sách user thành công",
+      user,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: error.message,
+    });
+  }
+};
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndRemove(req.params.id);
+    if (!user) {
+      return res.status(400).json({
+        message: "user không tồn tại !",
+      });
+    }
+    return res.json({
+      message: "Xóa user thành công !",
+      user,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   signup,
   signin,
+  getAllUser,
+  deleteUser,
 };
