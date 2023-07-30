@@ -52,4 +52,72 @@ const getOrderAll = async (req, res) => {
     });
   }
 };
-module.exports = { getOrderAll, order };
+const getOrderByUserId = async (req, res) => {
+  const userId = req.params.userId;
+  let { page = 1 } = req.query;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+  try {
+    const orders = await Order.find({ userId })
+      .skip((+page - 1) * limit)
+      .limit(limit);
+    const totalOrder = await Order.count({ userId });
+    const totalPage = Math.ceil(totalOrder / +limit);
+    if (!orders) {
+      res.status(404).json({
+        message: "Không tìm thấy dữ liệu",
+      });
+    }
+    res.status(200).json({
+      message: "Lấy dữ liệu thành công",
+      orders,
+      totalOrder,
+      totalPage,
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+const getOrderById = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const orders = await Order.findById(id);
+    if (!orders) {
+      res.status(404).json({
+        message: "Không tìm thấy dữ liệu",
+      });
+    }
+    res.status(200).json({
+      message: "Lấy dữ liệu thành công",
+      orders,
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+const deleteOrder = async (req, res) => {
+  const id = req.params.id;
+  try {
+    await Order.findByIdAndRemove(id);
+    return res.status(200).json({
+      message: "Huỷ đơn hàng thành công",
+      order,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+module.exports = {
+  getOrderAll,
+  order,
+  getOrderByUserId,
+  getOrderById,
+  deleteOrder,
+};
