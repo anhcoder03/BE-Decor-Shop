@@ -28,6 +28,7 @@ router.post("/create_payment_url", async function (req, res, next) {
     shippingAddress,
     phoneNumber,
     paymentMethods,
+    paymentStatus: "Paid",
   };
   const dataa = await Order.create(data);
   process.env.TZ = "Asia/Ho_Chi_Minh";
