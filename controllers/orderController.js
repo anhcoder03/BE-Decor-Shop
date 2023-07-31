@@ -83,7 +83,7 @@ const getOrderByUserId = async (req, res) => {
 const getOrderById = async (req, res) => {
   const id = req.params.id;
   try {
-    const orders = await Order.findById(id);
+    const orders = await Order.findById(id).populate("carts.productId");
     if (!orders) {
       res.status(404).json({
         message: "Không tìm thấy dữ liệu",
@@ -114,10 +114,51 @@ const deleteOrder = async (req, res) => {
     });
   }
 };
+
+const updateOrder = async (req, res) => {
+  const { status } = req.body;
+  const id = req.params.id;
+  let paymentStatus = "";
+  try {
+    if (status === "Delivery successful") {
+      paymentStatus = "Paid";
+      await Order.findByIdAndUpdate(id, {
+        status,
+        paymentStatus,
+      });
+      return res.status(200).json({
+        message: "Update trạng thái thành công ",
+      });
+    } else {
+      const data = await Order.findById(id);
+      if (data.paymentMethods === "OnlinePayment") {
+        await Order.findByIdAndUpdate(id, {
+          status,
+          paymentStatus: "Paid",
+        });
+        return res.status(200).json({
+          message: "Update trạng thái thành công ",
+        });
+      } else {
+        await Order.findByIdAndUpdate(id, {
+          status,
+          paymentStatus: "Unpaid",
+        });
+        return res.status(200).json({
+          message: "Update trạng thái thành công ",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
 module.exports = {
   getOrderAll,
   order,
   getOrderByUserId,
   getOrderById,
   deleteOrder,
+  updateOrder,
 };
